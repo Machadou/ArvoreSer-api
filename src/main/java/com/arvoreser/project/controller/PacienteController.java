@@ -4,6 +4,7 @@ import com.arvoreser.project.model.Paciente;
 import com.arvoreser.project.service.PacienteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.net.URI;
 import java.util.List;
 
