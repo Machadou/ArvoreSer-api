@@ -41,6 +41,9 @@ public class SalaAtendimentoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        return service.deletar(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        // Mesma lógica de encapsulamento: a verificação de existência fica no Service
+        service.deletar(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

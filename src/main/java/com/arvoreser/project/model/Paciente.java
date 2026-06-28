@@ -1,6 +1,7 @@
-package com.arvoreser.project.model; // Atenção ao pacote corrigido!
+package com.arvoreser.project.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*; // 1. Importar o pacote de validação
 
 @Entity
 @Table(name = "pacientes")
@@ -10,8 +11,11 @@ public class Paciente extends Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "O CPF é obrigatório e não pode estar em branco")
+    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "O CPF deve estar no formato 123.456.789-00")
     @Column(unique = true, nullable = false)
     private String cpf;
+
 
     // Getters e Setters
     public Long getId() { return id; }

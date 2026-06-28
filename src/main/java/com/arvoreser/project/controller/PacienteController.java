@@ -41,6 +41,10 @@ public class PacienteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        return service.deletar(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        // 1. Chamamos o serviço. Se o ID não existir, ele lança erro 404 e nem passa desta linha!
+        service.deletar(id);
+
+        // 2. Se passou da linha de cima, significa que apagou com sucesso. Devolvemos 204 No Content.
+        return ResponseEntity.noContent().build();
     }
 }

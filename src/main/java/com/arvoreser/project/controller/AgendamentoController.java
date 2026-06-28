@@ -1,9 +1,13 @@
 package com.arvoreser.project.controller;
 
+import com.arvoreser.project.dto.AgendamentoRequest;
+import com.arvoreser.project.dto.AgendamentoResponse;
+import com.arvoreser.project.mapper.AgendamentoMapper;
 import com.arvoreser.project.model.Agendamento;
+import com.arvoreser.project.service.AgendamentoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.arvoreser.project.service.AgendamentoService;
 
 import java.net.URI;
 import java.util.List;
@@ -17,30 +21,34 @@ public class AgendamentoController {
     public AgendamentoController(AgendamentoService service) { this.service = service; }
 
     @GetMapping
-    public ResponseEntity<List<Agendamento>> listar() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<List<AgendamentoResponse>> listar() {
+        return ResponseEntity.ok(service.listarTodos().stream()
+                .map(AgendamentoMapper::toResponse).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Agendamento> buscar(@PathVariable Long id) {
-        Agendamento agendamento = service.buscarPorId(id);
-        return agendamento != null ? ResponseEntity.ok(agendamento) : ResponseEntity.notFound().build();
+    public ResponseEntity<AgendamentoResponse> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(AgendamentoMapper.toResponse(service.buscarPorId(id)));
     }
 
     @PostMapping
-    public ResponseEntity<Agendamento> criar(@RequestBody Agendamento agendamento) {
-        Agendamento salvo = service.salvar(agendamento);
-        return ResponseEntity.created(URI.create("/agendamentos/" + salvo.getId())).body(salvo);
+    public ResponseEntity<AgendamentoResponse> criar(@Valid @RequestBody AgendamentoRequest req) {
+        Agendamento salvo = service.criar(req);
+        return ResponseEntity
+                .created(URI.create("/agendamentos/" + salvo.getId()))
+                .body(AgendamentoMapper.toResponse(salvo));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Agendamento> atualizar(@PathVariable Long id, @RequestBody Agendamento agendamento) {
-        Agendamento atualizado = service.atualizar(id, agendamento);
-        return atualizado != null ? ResponseEntity.ok(atualizado) : ResponseEntity.notFound().build();
+    public ResponseEntity<AgendamentoResponse> atualizar(@PathVariable Long id,
+                                                         @Valid @RequestBody AgendamentoRequest req) {
+        Agendamento atualizado = service.atualizar(id, req);
+        return ResponseEntity.ok(AgendamentoMapper.toResponse(atualizado));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        return service.deletar(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

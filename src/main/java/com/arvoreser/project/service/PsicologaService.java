@@ -1,9 +1,10 @@
 package com.arvoreser.project.service;
 
+import com.arvoreser.project.exception.ResourceNotFoundException;
 import com.arvoreser.project.model.Psicologa;
+import com.arvoreser.project.repository.PsicologaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.arvoreser.project.repository.PsicologaRepository;
 
 import java.util.List;
 
@@ -14,24 +15,32 @@ public class PsicologaService {
 
     public PsicologaService(PsicologaRepository repo) { this.repo = repo; }
 
+    @Transactional(readOnly = true)
     public List<Psicologa> listarTodos() { return repo.findAll(); }
 
-    public Psicologa buscarPorId(Long id) { return repo.findById(id).orElse(null); }
+    @Transactional(readOnly = true)
+    public Psicologa buscarPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Psicóloga não encontrada: id=" + id));
+    }
 
     @Transactional
     public Psicologa salvar(Psicologa psicologa) { return repo.save(psicologa); }
 
     @Transactional
-    public Psicologa atualizar(Long id, Psicologa atualizada) {
-        if (!repo.existsById(id)) return null;
-        atualizada.setId(id);
-        return repo.save(atualizada);
+    public Psicologa atualizar(Long id, Psicologa dados) {
+        Psicologa existente = buscarPorId(id);
+        if (dados.getNome() != null)     existente.setNome(dados.getNome());
+        if (dados.getTelefone() != null) existente.setTelefone(dados.getTelefone());
+        if (dados.getCrp() != null)      existente.setCrp(dados.getCrp());
+        return repo.save(existente);
     }
 
     @Transactional
-    public boolean deletar(Long id) {
-        if (!repo.existsById(id)) return false;
+    public void deletar(Long id) {
+        if (!repo.existsById(id)) {
+            throw new ResourceNotFoundException("Psicóloga não encontrada: id=" + id);
+        }
         repo.deleteById(id);
-        return true;
     }
 }
